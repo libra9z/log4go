@@ -67,7 +67,7 @@ const (
 // These are the integer logging levels used by the logger
 type level int
 
-//类型别名
+// type alias
 type Level = level
 
 const (
