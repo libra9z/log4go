@@ -67,6 +67,9 @@ const (
 // These are the integer logging levels used by the logger
 type level int
 
+//类型别名
+type Level = level
+
 const (
 	FINEST level = iota
 	FINE
