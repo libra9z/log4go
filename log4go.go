@@ -67,7 +67,7 @@ const (
 // These are the integer logging levels used by the logger
 type level int
 
-//绫诲瀷鍒悕
+//类型别名
 type Level = level
 
 const (
