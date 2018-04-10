@@ -31,6 +31,9 @@ type FileLogWriter struct {
 	maxsize         int
 	maxsize_cursize int
 
+	//max file counts
+	maxfiles		int
+
 	// Rotate daily
 	daily          bool
 	daily_opendate int
@@ -64,6 +67,7 @@ func NewFileLogWriter(fname string, rotate bool) *FileLogWriter {
 		filename: fname,
 		format:   "[%D %T] [%L] (%S) %M",
 		rotate:   rotate,
+		maxfiles: 999,
 	}
 
 	// open the file for the first time
@@ -138,13 +142,23 @@ func (w *FileLogWriter) intRotate() error {
 			// Find the next available number
 			num := 1
 			fname := ""
-			for ; err == nil && num <= 999; num++ {
+			for ; err == nil && num <= w.maxfiles; num++ {
 				fname = w.filename + fmt.Sprintf(".%03d", num)
 				_, err = os.Lstat(fname)
 			}
 			// return error if the last file checked still existed
 			if err == nil {
-				return fmt.Errorf("Rotate: Cannot find free log number to rename %s\n", w.filename)
+				//return fmt.Errorf("Rotate: Cannot find free log number to rename %s\n", w.filename)
+				err = os.Remove(w.filename+".001")
+				if err == nil {
+					tname := ""
+					for i:=2;i<=w.maxfiles;i++ {
+						fname = w.filename + fmt.Sprintf(".%03d", i)
+						tname = w.filename + fmt.Sprintf(".%03d", i-1)
+
+						err = os.Rename(fname,tname)
+					}
+				}
 			}
 
 			// Rename the file to its newfound home
@@ -226,6 +240,16 @@ func (w *FileLogWriter) SetRotate(rotate bool) *FileLogWriter {
 	w.rotate = rotate
 	return w
 }
+
+
+// Set rotate at maxfiles. Must be called before the first log
+// message is written.
+func (w *FileLogWriter) SetRotateFiles(maxfiles int) *FileLogWriter {
+	//fmt.Fprintf(os.Stderr, "FileLogWriter.SetRotateLines: %v\n", maxlines)
+	w.maxfiles = maxfiles
+	return w
+}
+
 
 // NewXMLLogWriter is a utility method for creating a FileLogWriter set up to
 // output XML record log messages instead of line-based ones.
