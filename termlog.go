@@ -10,6 +10,7 @@ import (
 
 var stdout io.Writer = os.Stdout
 
+var  _ ConsoleLogWriter = NewConsoleLogWriter()
 // This is the standard writer that prints to standard output.
 type ConsoleLogWriter chan *LogRecord
 
